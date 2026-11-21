@@ -65,11 +65,10 @@ h3{margin:18px 0 4px;font-size:15px}
 // Tempel URL Web App dari Apps Script (Deploy > Manage deployments) di sini
 const API_URL='https://script.google.com/macros/s/AKfycbzm48kE7gM6gTah8PgH_So2Nsfff4nuJrlwPY0JjQm0ffdYT6Bp25ZrEzkCC3fvSdgO/exec';
 async function call(action,data){
- const kode=localStorage.getItem('kode')||prompt('Masukkan kode akses')||'';
- const r=await fetch(API_URL,{method:'POST',body:JSON.stringify({action,kode,data})});
+ const r=await fetch(API_URL,{method:'POST',body:JSON.stringify({action,data})});
  const j=await r.json();
- if(!j.ok){if(j.error==='KODE_SALAH'){localStorage.removeItem('kode');throw new Error('Kode akses salah, coba lagi')}throw new Error(j.error)}
- localStorage.setItem('kode',kode);return j.result}
+ if(!j.ok)throw new Error(j.error);
+ return j.result}
 const NAMA=["Galih Tegar Wicaksono","Ikhwan Lazuardy Anwar","Agung Kurniawan","Brilliandi Asa Fardana"];
 const NAMA_ABS=[...NAMA,"Kiki Afandi"];
 const TUGAS={H1:["Kepala Gudang","Kasir","STNK BPKB","Admin AR","Admin SO","Kebersihan H1"],
