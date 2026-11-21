@@ -63,7 +63,7 @@ h3{margin:18px 0 4px;font-size:15px}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 // Tempel URL Web App dari Apps Script (Deploy > Manage deployments) di sini
-const API_URL='PASTE_URL_WEB_APP_DI_SINI';
+const API_URL='https://script.google.com/macros/s/AKfycbzm48kE7gM6gTah8PgH_So2Nsfff4nuJrlwPY0JjQm0ffdYT6Bp25ZrEzkCC3fvSdgO/exec';
 async function call(action,data){
  const kode=localStorage.getItem('kode')||prompt('Masukkan kode akses')||'';
  const r=await fetch(API_URL,{method:'POST',body:JSON.stringify({action,kode,data})});
