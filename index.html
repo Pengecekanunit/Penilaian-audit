@@ -25,7 +25,7 @@ h3{margin:18px 0 4px;font-size:15px}
 .it{border:1px solid var(--b);border-radius:10px;padding:12px;margin:10px 0}.it span{font-size:13px;color:var(--m)}
 </style></head><body>
 <header>Penilaian Kerja &amp; Absensi</header>
-<nav><button class="on" data-f="fN">Penilaian</button><button data-f="fA">Absensi</button><button data-f="fD">Dinas</button></nav>
+<nav><button class="on" data-f="fN">Penilaian</button><button data-f="fA">Absensi</button><button data-f="fD">Dinas</button><button data-f="fS">Sanksi</button></nav>
 <main><div id="msg"></div>
 
 <form id="fN" class="on">
@@ -46,6 +46,18 @@ h3{margin:18px 0 4px;font-size:15px}
 <label>Peserta Dinas</label><div id="peserta"></div>
 <label>Keterangan</label><textarea name="keterangan" rows="2"></textarea>
 <button class="go">Simpan Absen Dinas</button></form>
+
+<form id="fS">
+<label>Nama Karyawan</label><input name="karyawan" required>
+<label>Sanksi</label><select name="sanksi" required><option value="">-- Pilih sanksi --</option><option>SP 1</option><option>SP 2</option><option>SP 3</option><option>SURAT TEGURAN</option><option>TEGURAN LISAN</option></select>
+<label>Penyebab Sanksi</label><textarea name="penyebab" rows="3" required></textarea>
+<label>ACC</label><select name="acc" required><option value="">-- Pilih ACC --</option><option>ACC H23</option><option>ACC DIREKSI</option></select>
+<label>Nama yang Mengajukan</label><select name="pengaju" required><option value="">-- Pilih nama --</option><option>Kiki Afandi</option><option>Ikhwan Lazuardy A.</option><option>Galih Tegar W.</option><option>Brilliandi Asa F.</option><option>Agung Kurniawan</option></select>
+<label>Tanggal Pengajuan</label><input type="date" name="tgl_ajuan" required>
+<label>Tanggal Diterima dari HRD</label><input type="date" name="tgl_hrd" class="opt">
+<label>Tanggal Diterima dari Karyawan Bersangkutan</label><input type="date" name="tgl_karyawan" class="opt">
+<label>Tanggal Dikirim Kembali ke HRD</label><input type="date" name="tgl_kembali" class="opt">
+<button class="go">Simpan Pengajuan Sanksi</button></form>
 
 <form id="fA">
 <label>Upload File Absensi (.xlsx / .xls / .csv)</label><input type="file" id="rf" accept=".xlsx,.xls,.csv">
@@ -76,7 +88,7 @@ const TUGAS={H1:["Kepala Gudang","Kasir","STNK BPKB","Admin AR","Admin SO","Kebe
 const $=s=>document.querySelector(s),today=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
 document.querySelectorAll('.nm').forEach(s=>s.innerHTML=NAMA.map(n=>`<option>${n}</option>`).join(''));
 $('#peserta').innerHTML=NAMA_ABS.map(n=>`<label class="chk"><input type="checkbox" value="${n}"> ${n}</label>`).join('');
-document.querySelectorAll('input[type=date]').forEach(i=>i.value=today);
+document.querySelectorAll('input[type=date]:not(.opt)').forEach(i=>i.value=today);
 function tugas(){$('#tugas').innerHTML=TUGAS[$('#grup').value].map(t=>`<option>${t}</option>`).join('')}
 $('#grup').onchange=tugas;tugas();
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
@@ -89,13 +101,15 @@ function resize(file){return new Promise(r=>{const i=new Image;i.onload=()=>{con
 $('#foto').onchange=e=>{$('#prev').innerHTML=[...e.target.files].slice(0,3).map(f=>`<img src="${URL.createObjectURL(f)}">`).join('')};
 function submit(form,fn,build){form.onsubmit=async e=>{e.preventDefault();const b=form.querySelector('.go'),ot=b.textContent;b.disabled=true;b.textContent='Menyimpan…';
  try{const d=await build(Object.fromEntries(new FormData(form)));await call(fn,d);msg('Data berhasil disimpan ✓',1);form.reset();$('#prev').innerHTML='';
-  document.querySelectorAll('input[type=date]').forEach(i=>i.value=today);tugas()}
+  document.querySelectorAll('input[type=date]:not(.opt)').forEach(i=>i.value=today);tugas()}
  catch(x){msg('Gagal: '+x.message)}
  b.disabled=false;b.textContent=ot}}
 submit($('#fN'),'saveNilai',async d=>{d.fotos=await Promise.all([...$('#foto').files].slice(0,3).map(resize));return d});
 $('#fD [name=mulai]').onchange=e=>{const t=$('#fD [name=selesai]');if(!t.value||t.value<e.target.value)t.value=e.target.value};
 submit($('#fD'),'saveDinas',async d=>{if(d.selesai<d.mulai)throw new Error('Tanggal selesai tidak boleh sebelum tanggal mulai');d.peserta=[...document.querySelectorAll('#peserta input:checked')].map(c=>c.value);
  if(!d.peserta.length)throw new Error('Pilih minimal 1 peserta');return d});
+
+submit($('#fS'),'saveSanksi',async d=>d);
 
 // ===== Absensi =====
 let rows=[],H=[],last=[],TB=null;
